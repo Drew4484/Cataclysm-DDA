@@ -1,0 +1,36 @@
+
+  {
+    "id": "afs_wheel_hover",
+    "type": "vehicle_part",
+    "name": { "str": "hovercraft air skirt" },
+    "item": "afs_air_skirt",
+    "location": "under",
+    "looks_like": "inflatable_section",
+    "categories": [ "movement" ],
+    "color": "dark_gray",
+    "durability": 400,
+    "description": "A flexible skirt wraps around the vehicle's base, allowing fans to create a high-pressure cushion of air for the vehicle to float on.",
+    "damage_modifier": 50,
+    "breaks_into": [
+      { "item": "hc_steel_lump", "count": [ 1, 2 ] },
+      { "item": "hc_steel_chunk", "count": [ 1, 2 ] },
+      { "item": "scrap", "count": [ 2, 3 ] },
+	  { "item": "plastic", "count": [ 3, 4] },
+	  { "item": "chunk_rubber", "count": [ 5, 7]
+    ],
+    "rolling_resistance": 0.15,
+    "wheel_terrain_modifiers": { "FLAT": [ 0, 4 ], "ROAD": [ 0, 2 ] },
+    "contact_area": 10,
+    "requirements": {
+      "install": { "skills": [ [ "mechanics", 0 ] ], "time": "15 m", "using": [ [ "vehicle_fasten", 1 ] ] },
+      "removal": { "skills": [ [ "mechanics", 0 ] ], "time": "15 m", "using": [ [ "vehicle_fasten", 1 ] ] },
+      "repair": { "skills": [ [ "mechanics", 4 ] ], "time": "10 m", "using": [ [ "adhesive_rubber", 1 ], [ "tire_rubber", 1 ] ] }
+    },
+    "flags": [ "WHEEL", "CHIMES", "NEEDS_JACKING", "NEEDS_WHEEL_MOUNT_SKIRT", "MULTISQUARE" ],
+    "damage_reduction": { "bash": 25 },
+    "variants": [ { "symbols": "O", "symbols_broken": "x" } ]
+  }
+  
+  Add Wheel mount skirt
+  Skirt can be repaired and replaced, but mount cannot
+  Add fans
