@@ -1,4 +1,33 @@
-
+[
+  {
+    "type": "vehicle_part",
+    "id": "afs_mount_skirt",
+    "name": { "str": "hovercraft skirt mount" },
+    "categories": [ "movement" ],
+    "location": "axle",
+    "damage_modifier": 80,
+    "durability": 120,
+    "description": "A mounting point for an air cushion vehicle's inflatable skirt.",
+    "item": "afs_mount_skirt",
+    "//": "150 cm weld",
+    "requirements": {
+      "install": {
+        "skills": [ [ "mechanics", 5 ] ],
+        "time": "60 m",
+        "using": [ [ "welding_standard", 150 ], [ "vehicle_wrench_2", 1 ] ]
+      },
+      "removal": {
+        "skills": [ [ "mechanics", 3 ] ],
+        "time": "20 m",
+        "using": [ [ "vehicle_weld_removal", 1 ], [ "vehicle_wrench_2", 1 ] ]
+      },
+      "repair": { "skills": [ [ "mechanics", 2 ] ], "time": "8 m", "using": [ [ "repair_welding_standard", 4 ] ] }
+    },
+    "flags": [ "WHEEL_MOUNT_SKIRT", "NEEDS_JACKING", "STEERABLE" ],
+    "breaks_into": [ { "item": "scrap", "count": [ 1, 4 ] }, { "item": "steel_chunk", "count": [ 3, 7 ] } ],
+    "damage_reduction": { "all": 40 },
+    "variants": [ { "symbols": "-", "symbols_broken": "X" } ]
+  },
   {
     "id": "afs_wheel_hover",
     "type": "vehicle_part",
@@ -19,7 +48,6 @@
 	  { "item": "chunk_rubber", "count": [ 5, 7]
     ],
     "rolling_resistance": 0.15,
-    "wheel_terrain_modifiers": { "FLAT": [ 0, 4 ], "ROAD": [ 0, 2 ] },
     "contact_area": 10,
     "requirements": {
       "install": { "skills": [ [ "mechanics", 0 ] ], "time": "15 m", "using": [ [ "vehicle_fasten", 1 ] ] },
@@ -30,7 +58,5 @@
     "damage_reduction": { "bash": 25 },
     "variants": [ { "symbols": "O", "symbols_broken": "x" } ]
   }
-  
-  Add Wheel mount skirt
-  Skirt can be repaired and replaced, but mount cannot
+  ]
   Add fans
