@@ -1,0 +1,7 @@
+  {
+    "type": "keybinding",
+    "id": "MANAGE_EXOSUIT",
+    "name": "Manage Exosuit",
+    "category": "DEFAULTMODE",
+    "bindings": [ { "input_method": "keyboard_any", "key": "|" } ]
+  }
