@@ -46,14 +46,18 @@
     "use_action": {
       "type": "consume_drug",
       "activation_message": "You take a swig, it tastes like it was distilled in a hyperspace engine.",
-      "effects": [ { "id": "pkill1", "duration": "60 m" }, { "id": "pkill2", "duration": "30 m" }, { "id": "high", "duration": "15 m" } ]
+      "effects": [
+        { "id": "pkill1_generic", "duration": "60 m" },
+        { "id": "pkill2", "duration": "30 m" },
+        { "id": "high", "duration": "15 m" }
+      ]
     },
     "comestible_type": "DRINK",
     "symbol": "~",
     "calories": 163,
-    "stim": 18,
-    "quench": 6,
-    "healthy": -6,
+    "stim": 6,
+    "quench": 26,
+    "healthy": -2,
     "addiction_potential": 6,
     "description": "Spite Soda, the only soda native to the Salus system.  'Stay Frosty, Drink Spite'.  Visitors to the Salus system who have drank Spite Soda have described it as the taste of transhumanist dialectical materialism.",
     "price": "10 USD",
@@ -64,7 +68,6 @@
     "phase": "liquid",
     "charges": 2,
     "fun": 10,
-    "vitamins": [ [ "bad_food", -6 ] ],
     "flags": [ "EATEN_COLD" ],
     "freezing_point": -9999
   },

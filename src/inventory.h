@@ -111,6 +111,19 @@ struct quality_query {
     }
 };
 
+// Shared with reservation discovery, so a bound provider cannot outlive the condition
+// that made it usable.
+bool tile_has_sufficient_sunlight( const map &m, const tripoint_bub_ms &p );
+
+class map_stack;
+struct itype;
+
+// Charges of the first item in the stack matching the type, or the first matching the
+// ammotype with its id written back.
+int count_charges_in_list( const itype *type, const map_stack &items );
+int count_charges_in_list( const ammotype *ammotype, const map_stack &items,
+                           itype_id &item_type );
+
 class inventory : public visitable
 {
     public:
@@ -145,6 +158,14 @@ class inventory : public visitable
         // returns a reference to the added item
         item &add_item( item newit, bool keep_invlet = false, bool assign_invlet = true,
                         bool should_stack = true );
+        // Bulk variant of add_item for callers ingesting many items at once
+        // (json save load, form_from_map). Preserves source order within each
+        // typeId bucket to match add_item's per-item invlet inheritance.
+        // Supports keep_invlet=true,assign_invlet=false and
+        // keep_invlet=false,assign_invlet=false; other combinations fall
+        // through to repeated add_item calls.
+        void add_items_bulk( std::vector<item> items_in, bool keep_invlet = false,
+                             bool assign_invlet = true, bool should_stack = true );
         void add_item_keep_invlet( const item &newit );
         void push_back( const item &newit );
 

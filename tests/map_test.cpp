@@ -22,6 +22,7 @@
 #include "itype.h"
 #include "map.h"
 #include "map_helpers.h"
+#include "map_helpers_tests.h"
 #include "map_scale_constants.h"
 #include "map_selector.h"
 #include "monster.h"
@@ -87,7 +88,7 @@ TEST_CASE( "map_coordinate_conversion_functions" )
 
 TEST_CASE( "destroy_grabbed_furniture" )
 {
-    clear_map();
+    clear_map_without_vision();
     avatar &player_character = get_avatar();
     GIVEN( "Furniture grabbed by the player" ) {
         const tripoint_bub_ms test_origin( 60, 60, 0 );
@@ -113,7 +114,7 @@ TEST_CASE( "map_bounds_checking" )
     // vehicles are stored in the global MAPBUFFER which all maps refer to.  To
     // work around the problem we clear the map of vehicles, but this is an
     // inelegant solution.
-    clear_map();
+    clear_map_without_vision();
     map m;
     tripoint_abs_sm point_away_from_real_map( get_map().get_abs_sub() + point( MAPSIZE_X, 0 ) );
     m.load( point_away_from_real_map, false );
@@ -139,7 +140,7 @@ TEST_CASE( "tinymap_bounds_checking" )
     // vehicles are stored in the global MAPBUFFER which all maps refer to.  To
     // work around the problem we clear the map of vehicles, but this is an
     // inelegant solution.
-    clear_map();
+    clear_map_without_vision();
     tinymap m;
     tripoint_abs_sm point_away_from_real_map( get_map().get_abs_sub() + point( MAPSIZE_X, 0 ) );
     m.load( project_to<coords::omt>( point_away_from_real_map + point::east ),
@@ -191,6 +192,33 @@ TEST_CASE( "place_player_can_safely_move_multiple_submaps" )
     // broken active item cache.
     g->place_player( tripoint_bub_ms::zero );
     get_map().check_submap_active_item_consistency();
+}
+
+TEST_CASE( "active_item_cache_does_not_duplicate_items_after_index_invalidation",
+           "[active_item][cache]" )
+{
+    active_item_cache cache;
+    item survivor( itype_disinfectant );
+    REQUIRE( survivor.needs_processing() );
+    REQUIRE( cache.add( survivor, point_rel_ms::zero ) );
+
+    // Removing an expired item invalidates the lookup index.
+    // The surviving item is still in the cache, so adding it again must rebuild the index instead of creating a duplicate.
+    // Repeat for more than one processing interval so duplicates would also be visible in get_for_processing().
+    const int invalidations = survivor.processing_speed() + 1;
+    for( int i = 0; i < invalidations; ++i ) {
+        auto temporary = std::make_unique<item>( itype_disinfectant );
+        cache.add( *temporary, point_rel_ms::zero );
+        temporary.reset();
+        cache.get();
+        cache.add( survivor, point_rel_ms::zero );
+    }
+
+    const std::vector<item_reference> cached = cache.get();
+    CHECK( cached.size() == 1 );
+
+    const std::vector<item_reference> to_process = cache.get_for_processing();
+    CHECK( to_process.size() == 1 );
 }
 
 TEST_CASE( "inactive_container_with_active_contents", "[active_item][map]" )
@@ -291,7 +319,7 @@ TEST_CASE( "milk_rotting", "[active_item][map]" )
 TEST_CASE( "active_monster_drops", "[active_item][map]" )
 {
     map &here = get_map();
-    clear_map();
+    clear_map_without_vision();
     get_avatar().setpos( here, tripoint_bub_ms::zero );
     tripoint_bub_ms start_loc = get_avatar().pos_bub( here ) + tripoint::east;
     restore_on_out_of_scope restore_temp(

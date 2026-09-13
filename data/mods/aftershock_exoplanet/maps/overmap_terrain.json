@@ -34,6 +34,14 @@
     "flags": [ "SOURCE_FOOD", "SOURCE_GUN", "SOURCE_AMMO" ]
   },
   {
+    "type": "overmap_terrain",
+    "name": "old landing pad",
+    "id": [ "afs_shuttlepad_salvors_old_pad" ],
+    "sym": "0",
+    "color": "red",
+    "see_cost": "high"
+  },
+  {
     "id": "afs_landed_shuttle",
     "type": "overmap_terrain",
     "name": "drone shuttle landing site",
@@ -50,7 +58,7 @@
     "color": "pink",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "id": "municipal_reactor_ware_b",
@@ -118,6 +126,15 @@
   },
   {
     "type": "overmap_terrain",
+    "id": "afs_ruins_dynamic",
+    "name": "ruined building",
+    "sym": "r",
+    "color": "light_gray",
+    "flags": [ "SIDEWALK", "NO_ROTATE" ],
+    "see_cost": "spaced_high"
+  },
+  {
+    "type": "overmap_terrain",
     "id": [ "afs_formless_ruins_dynamic" ],
     "name": "formless ruins",
     "spawns": { "group": "GROUP_ZOMBIE", "population": [ 1, 4 ], "chance": 50 },
@@ -156,7 +173,7 @@
     "spawns": { "group": "AFS_GROUP_AUG_CLINIC", "population": [ 4, 10 ], "chance": 80 },
     "sym": "P",
     "color": "yellow",
-    "flags": [ "SIDEWALK" ],
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ],
     "see_cost": "high"
   },
   {
@@ -174,7 +191,7 @@
     "name": "maintenance outpost",
     "sym": "i",
     "color": "cyan",
-    "flags": [ "SOURCE_FABRICATION", "SOURCE_ELECTRONICS", "SOURCE_CONSTRUCTION" ],
+    "flags": [ "SOURCE_FABRICATION", "SOURCE_ELECTRONICS", "SOURCE_CONSTRUCTION", "PP_GENERATE_RUINED" ],
     "see_cost": "high"
   },
   {
@@ -184,7 +201,7 @@
     "spawns": { "group": "AFS_GROUP_AUG_CLINIC", "population": [ 4, 10 ], "chance": 80 },
     "sym": "Q",
     "color": "cyan",
-    "flags": [ "SIDEWALK", "SOURCE_FOOD" ],
+    "flags": [ "SIDEWALK", "SOURCE_FOOD", "PP_GENERATE_RUINED" ],
     "see_cost": "high"
   },
   {
@@ -198,12 +215,26 @@
   },
   {
     "type": "overmap_terrain",
+    "id": [
+      "afs_modular_greenhouse",
+      "afs_modular_greenhouse_moxie",
+      "afs_modular_greenhouse_algae",
+      "afs_modular_greenhouse_slurry",
+      "afs_modular_greenhouse_hydro"
+    ],
+    "copy-from": "generic_city_building",
+    "name": "biotechnical flats",
+    "sym": "^",
+    "color": "i_green"
+  },
+  {
+    "type": "overmap_terrain",
     "id": [ "afs_astrobiology_lab_n1", "afs_astrobiology_lab_n2" ],
     "name": "astrobiology lab",
     "spawns": { "group": "GROUP_ZOMBIE", "population": [ 2, 5 ], "chance": 80 },
     "sym": "L",
     "color": "light_green",
-    "flags": [ "SIDEWALK", "SOURCE_FOOD" ],
+    "flags": [ "SIDEWALK", "SOURCE_FOOD", "PP_GENERATE_RUINED" ],
     "see_cost": "high",
     "mondensity": 3
   },
@@ -284,12 +315,13 @@
     "color": "i_pink",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
     "id": [ "robot_dispatch_second", "robot_dispatch_roof" ],
     "name": "robot dispatch center",
+    "flags": [ "PP_GENERATE_RUINED" ],
     "sym": "R",
     "color": "i_pink",
     "see_cost": "high",
@@ -331,6 +363,15 @@
   },
   {
     "type": "overmap_terrain",
+    "id": [ "afs_player_ship" ],
+    "name": "Vanishing Arc",
+    "sym": "+",
+    "color": "red",
+    "see_cost": "low",
+    "flags": [ "SOURCE_PEOPLE", "SOURCE_SAFETY" ]
+  },
+  {
+    "type": "overmap_terrain",
     "id": [
       "land_pad_outpost_basement_a1",
       "land_pad_outpost_basement_a2",
@@ -358,7 +399,7 @@
     "sym": "<",
     "color": "green",
     "spawns": { "group": "GROUP_ZOMBIE", "population": [ 1, 4 ], "chance": 50 },
-    "flags": [ "SIDEWALK" ],
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ],
     "see_cost": "high"
   },
   {
@@ -367,6 +408,7 @@
     "name": "house roof",
     "sym": "<",
     "color": "green",
+    "flags": [ "PP_GENERATE_RUINED" ],
     "see_cost": "none"
   },
   {
@@ -465,13 +507,25 @@
   },
   {
     "type": "overmap_terrain",
+    "name": "vehicle bay",
+    "spawns": { "group": "GROUP_ZOMBIE", "population": [ 2, 5 ], "chance": 80 },
+    "id": [ "afs_vehicle_bay_a1", "afs_vehicle_bay_a2", "afs_vehicle_bay_a1_roof", "afs_vehicle_bay_a2_roof" ],
+    "sym": "0",
+    "looks_like": "s_lot",
+    "color": "light_blue",
+    "see_cost": "high",
+    "mondensity": 2,
+    "flags": [ "SIDEWALK" ]
+  },
+  {
+    "type": "overmap_terrain",
     "name": "Solar Array",
     "id": [ "afs_solar_arrary_a1", "afs_solar_array_a2", "afs_solar_arrary_a1_roof", "afs_solar_array_a2_roof" ],
     "sym": "S",
     "color": "light_blue",
     "see_cost": "medium",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -487,7 +541,7 @@
     "color": "light_gray",
     "see_cost": "medium",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -531,7 +585,7 @@
     "color": "light_green",
     "see_cost": "full_high",
     "mondensity": 3,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -542,7 +596,7 @@
     "color": "light_green",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -562,7 +616,7 @@
     "color": "blue",
     "see_cost": "high",
     "mondensity": 3,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -595,7 +649,7 @@
     "color": "yellow",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -655,7 +709,7 @@
     "color": "green",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -665,7 +719,7 @@
     "color": "light_cyan",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -675,7 +729,7 @@
     "color": "light_cyan",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -685,7 +739,7 @@
     "color": "yellow",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -716,7 +770,7 @@
     "color": "light_blue",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -727,7 +781,7 @@
     "see_cost": "high",
     "mondensity": 2,
     "entry_eoc": "EOC_KNOW_SPACEPORT",
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -737,7 +791,7 @@
     "color": "light_green",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -747,7 +801,7 @@
     "color": "cyan",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -757,7 +811,7 @@
     "color": "green",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -767,7 +821,7 @@
     "color": "light_cyan",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -777,7 +831,7 @@
     "color": "light_green",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   },
   {
     "type": "overmap_terrain",
@@ -787,6 +841,6 @@
     "color": "light_red",
     "see_cost": "high",
     "mondensity": 2,
-    "flags": [ "SIDEWALK" ]
+    "flags": [ "SIDEWALK", "PP_GENERATE_RUINED" ]
   }
 ]

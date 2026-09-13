@@ -79,7 +79,7 @@ enum monster_horde_attraction {
 
 class monster : public Creature
 {
-        friend class editmap;
+        friend class editmap_ui;
     public:
         monster();
         explicit monster( const mtype_id &id );
@@ -115,7 +115,6 @@ class monster : public Creature
         void try_reproduce();
         void try_biosignature();
         void refill_udders();
-        void digest_food();
         void spawn( const tripoint_bub_ms &p );
         void spawn( const tripoint_abs_ms &loc );
         std::vector<material_id> get_absorb_material() const;
@@ -338,13 +337,15 @@ class monster : public Creature
         bool push_to( const tripoint_bub_ms &p, int boost, size_t depth );
 
         /** Returns innate monster bash skill, without calculating additional from helpers */
-        int bash_skill() const;
-        int bash_estimate() const;
+        std::map<damage_type_id, int> bash_skill() const;
+        std::map<damage_type_id, int> bash_estimate() const;
         /** Returns ability of monster and any cooperative helpers to
          * bash the designated target.  **/
-        int group_bash_skill( const tripoint_bub_ms &target );
+        std::map<damage_type_id, int> group_bash_skill( const tripoint_bub_ms &target );
 
-        void stumble();
+        void stumble_base( bool is_voluntary );
+        void stumble_voluntary();
+        void stumble_involuntary();
         void knock_back_to( const tripoint_bub_ms &to ) override;
 
         // Combat
@@ -423,6 +424,7 @@ class monster : public Creature
         float get_dodge_base() const override;
 
         float  get_dodge() const override;       // Natural dodge, or 0 if we're occupied
+        int blocks_left = 0; // Remaining blocks
         float  get_melee() const override; // For determining attack skill when awarding dodge practice.
         float  hit_roll() const override;  // For the purposes of comparing to player::dodge_roll()
         float  dodge_roll() const override;  // For the purposes of comparing to player::hit_roll()
@@ -473,7 +475,7 @@ class monster : public Creature
         void reset_stats() override;
 
         void die( map *here, Creature *killer ) override; //this is the die from Creature, it calls kill_mo
-        void drop_items_on_death( map *here, item *corpse );
+        void drop_items_on_death( map *here, item *corpse ) const;
         void spawn_dissectables_on_death( item *corpse ) const; //spawn dissectable CBMs into CORPSE pocket
         //spawn monster's inventory without killing it
         void generate_inventory( bool disableDrops = true );
@@ -554,22 +556,11 @@ class monster : public Creature
         // DEFINING VALUES
         int friendly = 0;
         int anger = 0;
-        int morale = 0;
+        int morale = 2;
     private:
-        int stomach_size = 0;
         int amount_eaten = 0;
         void recheck_fed_status();
     public:
-        void set_amount_eaten( int new_amount );
-        void mod_amount_eaten( int amount_to_add );
-        int get_amount_eaten() const;
-        // Truncates to integer for ease of use
-        int get_stomach_fullness_percent() const;
-        // Whether the monster has eaten enough to reproduce/make milk/get by normally
-        bool has_eaten_enough() const;
-        // Whether their stomach is completely full or more
-        // TODO: Find out why can we even exceed stomach size??
-        bool has_fully_eaten() const;
         // Our faction (species, for most monsters)
         mfaction_id faction;
         // If we're related to a mission
@@ -639,20 +630,19 @@ class monster : public Creature
         void process_trigger( mon_trigger trig, int amount );
         void process_trigger( mon_trigger trig, const std::function<int()> &amount_func );
 
-        int hp = 0;
+        int hp = 60;
         std::map<std::string, mon_special_attack, std::less<>> special_attacks;
         std::optional<tripoint_abs_ms> goal;
         bool dead = false;
         /** Normal upgrades **/
         int next_upgrade_time();
         bool upgrades = false;
-        int upgrade_time = 0;
+        int upgrade_time = -1;
         bool reproduces = false;
         std::optional<time_point> baby_timer;
         bool biosignatures = false;
         std::optional<time_point> biosig_timer;
         time_point udder_timer;
-        time_point stomach_timer;
         monster_horde_attraction horde_attraction = MHA_NULL;
         /** Found path. Note: Not used by monsters that don't pathfind! **/
         std::vector<tripoint_bub_ms> path;
@@ -689,6 +679,8 @@ class monster : public Creature
         void load( const JsonObject &data, const tripoint_abs_sm &submap_loc );
 
         void on_move( const tripoint_abs_ms &old_pos ) override;
+        void on_effect_int_change( const efftype_id &eid, int intensity,
+                                   const bodypart_id &bp ) override;
         /** Processes monster-specific effects of an effect. */
         void process_one_effect( effect &it, bool is_new ) override;
 };

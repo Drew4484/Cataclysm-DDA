@@ -11,21 +11,25 @@
     "color": "light_green_green",
     "melee_skill": 5,
     "melee_dice_sides": 6,
+    "vision_day": 30,
     "grab_strength": 30,
     "special_attacks": [ { "id": "grab" }, { "id": "scratch_humanoid" }, { "id": "bite_humanoid", "cooldown": 5, "min_mul": 0.8 } ],
     "death_drops": "mon_zombie_soldier_death_drops",
     "upgrades": { "half_life": 168, "into_group": "GROUP_SOLDIER_UPGRADE" },
     "armor": { "bash": 12, "cut": 25, "bullet": 20, "electric": 3 },
-    "extend": { "weakpoint_sets": [ "wps_humanoid_body_armor", "wps_humanoid_open_helmet" ], "families": [ "prof_wp_syn_armored" ] }
+    "extend": { "weakpoint_sets": [ "wps_humanoid_body_armor", "wps_humanoid_open_helmet" ], "families": [ "prof_wp_syn_armored" ] },
+    "delete": { "flags": [ "STUMBLES" ] }
   },
   {
     "id": "mon_zombie_soldier_no_weakpoints",
     "type": "MONSTER",
-    "name": { "str_sp": "zombie soldier test only" },
-    "description": "This zombie soldier is for testing purposes only.",
+    "name": { "str_sp": "zombie soldier test only", "//~": "NO_I18N" },
+    "description": { "str": "This zombie soldier is for testing purposes only.", "//~": "NO_I18N" },
     "copy-from": "mon_zombie_soldier",
     "dodge": 1,
-    "delete": { "weakpoint_sets": [ "wps_humanoid_body", "wps_humanoid_body_armor", "wps_humanoid_open_helmet" ] }
+    "delete": {
+      "weakpoint_sets": [ "wps_humanoid_body", "wps_vital_organs", "wps_eyes", "wps_humanoid_body_armor", "wps_humanoid_open_helmet" ]
+    }
   },
   {
     "id": "mon_zombie_soldier_blackops_1",
@@ -42,6 +46,7 @@
     "melee_dice_sides": 6,
     "dodge": 3,
     "bleed_rate": 50,
+    "vision_day": 30,
     "vision_night": 35,
     "harvest": "zombie_humanoid_shadow",
     "special_attacks": [
@@ -60,7 +65,8 @@
       "flags": [ "SMELLS", "NIGHT_INVISIBILITY" ],
       "weakpoint_sets": [ "wps_humanoid_body_armor", "wps_humanoid_open_helmet" ],
       "families": [ "prof_wp_syn_armored" ]
-    }
+    },
+    "delete": { "flags": [ "STUMBLES" ] }
   },
   {
     "id": "mon_zombie_soldier_blackops_2",
@@ -78,15 +84,14 @@
     "id": "mon_zombie_soldier_acid_1",
     "type": "MONSTER",
     "name": { "str": "bilious soldier zombie" },
-    "description": "This staggering soldier wears a burnt gasmask, now fused to its face.  Through the melted, bile-encrusted ruination of the mask protrudes some sort of hardened, fleshy proboscis, with steaming corrosive fluid leaking from the end.",
+    "description": "This staggering soldier wears a burnt gas mask, now fused to its face.  Through the melted, bile-encrusted ruination of the mask protrudes some sort of hardened, fleshy proboscis, with steaming corrosive fluid leaking from the end.",
     "copy-from": "mon_zombie_soldier",
     "looks_like": "mon_zombie_soldier",
     "diff": 20,
     "bleed_rate": 50,
     "harvest": "zombie_humanoid_acid",
     "delete": { "categories": [ "CLASSIC" ] },
-    "upgrades": false,
-    "relative": { "hp": 20, "speed": 10, "melee_skill": 1, "vision_day": 10, "vision_night": 10 },
+    "relative": { "hp": 20, "speed": 10, "melee_skill": 1, "vision_day": 10 },
     "extend": {
       "special_attacks": [
         [ "ACID_BARF", 10 ],
@@ -153,6 +158,7 @@
     "color": "light_green_white",
     "melee_skill": 5,
     "melee_dice_sides": 6,
+    "vision_day": 30,
     "harvest": "zombie_kevlar",
     "grab_strength": 30,
     "special_attacks": [
@@ -182,11 +188,14 @@
     "melee_skill": 6,
     "melee_dice": 2,
     "melee_dice_sides": 6,
+    "melee_damage": [ { "damage_type": "cut", "amount": 0 } ],
+    "vision_day": 30,
     "vision_night": 5,
     "harvest": "zombie_kevlar",
     "special_attacks": [
       { "id": "slam", "cooldown": 10, "damage_max_instance": [ { "damage_type": "bash", "amount": 12 } ] },
-      { "id": "smash", "throw_strength": 36, "cooldown": 30 }
+      { "id": "smash", "throw_strength": 36, "cooldown": 30 },
+      { "id": "smash_equal", "throw_strength": 18, "cooldown": 30 }
     ],
     "death_drops": "mon_zombie_kevlar_death_drops",
     "upgrades": { "half_life": 168, "into": "mon_zombie_kevlar_2" },
@@ -214,7 +223,9 @@
       { "id": "slam", "cooldown": 12, "damage_max_instance": [ { "damage_type": "bash", "amount": 35 } ] },
       { "id": "longswipe" },
       { "id": "cut_throat" },
-      { "id": "smash", "throw_strength": 72 }
+      { "id": "smash", "throw_strength": 72 },
+      { "id": "smash_equal", "throw_strength": 36 },
+      { "id": "hulk_wide_swing", "accuracy": 9 }
     ],
     "death_drops": "mon_zombie_kevlar_death_drops",
     "armor": { "bash": 30, "cut": 50, "bullet": 40, "electric": 6 },
@@ -235,11 +246,13 @@
     "speed": 75,
     "color": "light_green_green",
     "melee_dice_sides": 4,
+    "vision_day": 30,
+    "upgrades": false,
     "harvest": "zombie_humanoid",
     "death_drops": "mon_zombie_military_pilot_death_drops",
     "armor": { "bash": 5, "cut": 5, "bullet": 4, "electric": 2 },
     "extend": { "weakpoint_sets": [ "wps_humanoid_full_helmet" ], "flags": [ "NOHEAD" ] },
-    "delete": { "flags": [ "HEARS" ] }
+    "delete": { "flags": [ "HEARS", "STUMBLES" ] }
   },
   {
     "id": "mon_zombie_milbase_personnel",
@@ -304,6 +317,8 @@
     "special_attacks": [
       { "id": "grab" },
       { "id": "smash", "throw_strength": 75, "cooldown": 30 },
+      { "id": "smash_equal", "throw_strength": 37, "cooldown": 30 },
+      { "id": "hulk_wide_swing", "accuracy": 9 },
       { "id": "scratch_humanoid", "move_cost": 150, "cooldown": 4, "min_mul": 1.5, "max_mul": 3.5 },
       { "id": "bite_humanoid", "move_cost": 150, "cooldown": 2, "accuracy": 4, "infection_chance": 8 }
     ]
@@ -342,9 +357,11 @@
       }
     ],
     "bleed_rate": 0,
+    "vision_day": 30,
     "death_drops": "mon_zombie_armored_death_drops",
-    "burn_into": "mon_zombie_scorched",
+    "upgrades": false,
     "armor": { "bash": 64, "cut": 64, "acid": 20, "heat": 20, "bullet": 51, "electric": 10 },
-    "extend": { "families": [ "prof_wp_syn_armored" ], "flags": [ "PULP_PRYING" ] }
+    "extend": { "families": [ "prof_wp_syn_armored" ], "flags": [ "PULP_PRYING" ] },
+    "delete": { "flags": [ "STUMBLES", "GRABS", "PUSH_MON" ], "special_attacks": [ "bite_humanoid", "scratch_humanoid", "grab" ] }
   }
 ]

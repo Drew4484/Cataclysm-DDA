@@ -11,6 +11,7 @@
 #include "game.h"
 #include "map.h"
 #include "map_helpers.h"
+#include "map_helpers_tests.h"
 #include "map_iterator.h"
 #include "monster.h"
 #include "pathfinding.h"
@@ -82,7 +83,7 @@ static map &setup_map_without_obstacles()
 {
     const ter_id t_floor( "t_floor" );
     map &here = get_map();
-    clear_map();
+    clear_map_without_vision();
     const tripoint_bub_ms topleft = tripoint_bub_ms::zero;
     const tripoint_bub_ms bottomright { 20, 20, 0 };
     for( const tripoint_bub_ms &p : here.points_in_rectangle( topleft, bottomright ) ) {
@@ -184,7 +185,7 @@ TEST_CASE( "find_clear_path_with_adjacent_obstacles", "[map]" )
             expect_path( { nw, w_nw }, here.find_clear_path( p_center, w_nw ) );
         }
     }
-    clear_map();
+    clear_map_without_vision();
 }
 
 
@@ -289,7 +290,7 @@ TEST_CASE( "find_clear_path_5tiles_with_obstacles", "[map]" )
             CHECK( here.sees( target, source, -1 ) );
         }
     }
-    clear_map();
+    clear_map_without_vision();
 }
 
 
@@ -332,7 +333,7 @@ TEST_CASE( "map_route_player_without_obstacles", "[map][pathfinding]" )
             }
         }
     }
-    clear_map();
+    clear_map_without_vision();
 }
 
 TEST_CASE( "map_route_player_around_obstacles", "[map][pathfinding]" )
@@ -427,7 +428,7 @@ TEST_CASE( "map_route_player_around_obstacles", "[map][pathfinding]" )
             }
         }
     }
-    clear_map();
+    clear_map_without_vision();
 }
 
 TEST_CASE( "map_route_player_into_danger", "[map][pathfinding]" )
@@ -473,7 +474,7 @@ TEST_CASE( "map_route_player_into_danger", "[map][pathfinding]" )
             }
         }
     }
-    clear_map();
+    clear_map_without_vision();
 }
 
 TEST_CASE( "map_route_player_up_down_stairs", "[map][pathfinding]" )
@@ -492,6 +493,8 @@ TEST_CASE( "map_route_player_up_down_stairs", "[map][pathfinding]" )
          */
         m.ter_set( tripoint_bub_ms{ 67, 65, 0 }, t_stairs_up );
         m.ter_set( tripoint_bub_ms{ 67, 65, 1 }, t_stairs_down );
+        m.ter_set( tripoint_bub_ms{ 68, 65, 1 }, t_floor );
+        m.ter_set( tripoint_bub_ms{ 69, 65, 1 }, t_floor );
         clear_map_caches( m );
         WHEN( "map::route does pathfinding" ) {
             const pathfinding_target t = pathfinding_target::point(
@@ -531,7 +534,7 @@ TEST_CASE( "map_route_player_up_down_stairs", "[map][pathfinding]" )
             }
         }
     }
-    clear_map();
+    clear_map_without_vision();
 }
 
 TEST_CASE( "map_route_player_into_unreachable_tiles", "[map][pathfinding]" )
@@ -585,7 +588,7 @@ TEST_CASE( "map_route_player_into_unreachable_tiles", "[map][pathfinding]" )
             }
         }
     }
-    clear_map();
+    clear_map_without_vision();
 }
 
 TEST_CASE( "map_route_mon_around_danger", "[map][pathfinding]" )
@@ -645,5 +648,5 @@ TEST_CASE( "map_route_mon_around_danger", "[map][pathfinding]" )
             }
         }
     }
-    clear_map();
+    clear_map_without_vision();
 }

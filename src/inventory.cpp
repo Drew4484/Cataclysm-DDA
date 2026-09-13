@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <string>
@@ -36,6 +37,7 @@
 #include "units.h"
 #include "value_ptr.h"
 #include "vpart_position.h"
+#include "weather.h"
 
 static const itype_id itype_acetaminophen( "acetaminophen" );
 static const itype_id itype_aspirin( "aspirin" );
@@ -339,6 +341,79 @@ item &inventory::add_item( item newit, bool keep_invlet, bool assign_invlet, boo
     return items.back().back();
 }
 
+void inventory::add_items_bulk( std::vector<item> items_in, bool keep_invlet,
+                                bool assign_invlet, bool should_stack )
+{
+    // assign_invlet=true needs the per-item invlet collision resolution
+    // that bulk grouping cannot reproduce cheaply; fall back to add_item.
+    if( assign_invlet ) {
+        for( item &it : items_in ) {
+            add_item( std::move( it ), keep_invlet, assign_invlet, should_stack );
+        }
+        return;
+    }
+
+    binned = false;
+
+    if( !should_stack ) {
+        for( item &it : items_in ) {
+            if( !keep_invlet ) {
+                update_invlet( it, assign_invlet );
+            }
+            update_cache_with_item( it );
+            items.emplace_back( std::list<item> { std::move( it ) } );
+        }
+        return;
+    }
+
+    // Index existing stacks by the front item's typeId so each new entry skips
+    // the linear stacks_with sweep over unrelated stacks. Multiple stacks of
+    // the same typeId can coexist with different variant/damage/etc., so the
+    // bucket holds every match and the deep stacks_with check filters within.
+    std::unordered_map<itype_id, std::vector<invstack::iterator>> by_type;
+    for( auto it = items.begin(); it != items.end(); ++it ) {
+        by_type[it->front().typeId()].push_back( it );
+    }
+
+    for( item &newit : items_in ) {
+        bool merged = false;
+        auto bucket_it = by_type.find( newit.typeId() );
+        if( bucket_it != by_type.end() ) {
+            for( invstack::iterator stack_it : bucket_it->second ) {
+                std::list<item>::iterator front_it = stack_it->begin();
+                if( !front_it->stacks_with( newit ) ) {
+                    continue;
+                }
+                if( front_it->merge_charges( newit ) ) {
+                    merged = true;
+                    break;
+                }
+                if( front_it->invlet == '\0' ) {
+                    if( !keep_invlet ) {
+                        update_invlet( newit, assign_invlet );
+                    }
+                    update_cache_with_item( newit );
+                    front_it->invlet = newit.invlet;
+                } else {
+                    newit.invlet = front_it->invlet;
+                }
+                stack_it->emplace_back( std::move( newit ) );
+                merged = true;
+                break;
+            }
+        }
+        if( merged ) {
+            continue;
+        }
+        if( !keep_invlet ) {
+            update_invlet( newit, assign_invlet );
+        }
+        update_cache_with_item( newit );
+        items.emplace_back( std::list<item> { std::move( newit ) } );
+        by_type[items.back().front().typeId()].push_back( std::prev( items.end() ) );
+    }
+}
+
 void inventory::add_item_keep_invlet( const item &newit )
 {
     add_item( newit, true );
@@ -449,7 +524,7 @@ void inventory::restack( Character &p )
 #endif
 }
 
-static int count_charges_in_list( const itype *type, const map_stack &items )
+int count_charges_in_list( const itype *type, const map_stack &items )
 {
     for( const item &candidate : items ) {
         if( candidate.type == type ) {
@@ -468,8 +543,8 @@ static int count_charges_in_list( const itype *type, const map_stack &items )
 *
 * @return           Number of charges.
 * */
-static int count_charges_in_list( const ammotype *ammotype, const map_stack &items,
-                                  itype_id &item_type )
+int count_charges_in_list( const ammotype *ammotype, const map_stack &items,
+                           itype_id &item_type )
 {
     for( const item &candidate : items ) {
         if( candidate.is_ammo() && candidate.type->ammo->type == *ammotype ) {
@@ -495,8 +570,7 @@ void inventory::form_from_map( map *here, const tripoint_bub_ms &origin, int ran
     // Populate a grid of spots that can be reached
     // If we need a clear path we care about the reachability of points
     if( clear_path ) {
-        const std::vector<tripoint_bub_ms> &reachable_pts = here->reachable_flood_steps( origin, range, 1,
-                100 );
+        const std::vector<tripoint_bub_ms> &reachable_pts = here->reachable_flood_steps( origin, range );
         form_from_map( *here, reachable_pts, pl, assign_invlet );
     } else {
         std::vector<tripoint_bub_ms> reachable_pts;
@@ -520,11 +594,23 @@ void inventory::form_from_zone( map &m, std::unordered_set<tripoint_abs_ms> &zon
     form_from_map( m, pts, pl, assign_invlet );
 }
 
+bool tile_has_sufficient_sunlight( const map &m, const tripoint_bub_ms &p )
+{
+    if( !m.is_outside( p ) || p.z() < 0 ) {
+        return false;
+    }
+    const weather_type_id wtype = current_weather( m.get_abs( p ), calendar::turn );
+    return incident_sun_irradiance( wtype, calendar::turn ) > irradiance::high;
+}
+
 void inventory::form_from_map( map &m, std::vector<tripoint_bub_ms> pts, const Character *pl,
                                bool assign_invlet )
 {
     items.clear();
     provisioned_pseudo_tools.clear();
+
+    const bool bulk_eligible = !assign_invlet;
+    std::vector<item> bulk_batch;
 
     for( const tripoint_bub_ms &p : pts ) {
         const ter_id &t = m.ter( p );
@@ -539,7 +625,12 @@ void inventory::form_from_map( map &m, std::vector<tripoint_bub_ms> pts, const C
         }
         const furn_id &f = m.furn( p );
         const furn_t &fo = f.obj();
-        if( item *furn_item = provide_pseudo_item( fo.crafting_pseudo_item ) ) {
+        const itype_id &pseudo_id = fo.crafting_pseudo_item;
+        if( pseudo_id.is_valid() &&
+            pseudo_id->has_flag( flag_NEEDS_SUNLIGHT ) &&
+            !tile_has_sufficient_sunlight( m, p ) ) {
+            // Not enough sunlight for this tool
+        } else if( item *furn_item = provide_pseudo_item( fo.crafting_pseudo_item ) ) {
             for( const itype *ammo : fo.crafting_ammo_item_types() ) {
                 if( furn_item->has_pocket_type( pocket_type::MAGAZINE ) ) {
                     // NOTE: This only works if the pseudo item has a MAGAZINE pocket, not a MAGAZINE_WELL!
@@ -561,7 +652,8 @@ void inventory::form_from_map( map &m, std::vector<tripoint_bub_ms> pts, const C
             }
         }
         if( m.accessible_items( p ) ) {
-            for( item &i : m.i_at( p ) ) {
+            map_stack items_here = m.i_at( p );
+            for( item &i : items_here ) {
                 // if it's *the* player requesting this from from map inventory
                 // then don't allow items owned by another faction to be factored into recipe components etc.
                 if( pl && !i.is_owned_by( *pl, true ) ) {
@@ -572,7 +664,11 @@ void inventory::form_from_map( map &m, std::vector<tripoint_bub_ms> pts, const C
                         const int count = i.count_by_charges() ? i.charges : 1;
                         update_liq_container_count( i.typeId(), count );
                     }
-                    add_item( i, false, assign_invlet );
+                    if( bulk_eligible ) {
+                        bulk_batch.emplace_back( i );
+                    } else {
+                        add_item( i, false, assign_invlet );
+                    }
                 }
             }
         }
@@ -603,6 +699,11 @@ void inventory::form_from_map( map &m, std::vector<tripoint_bub_ms> pts, const C
             vp->form_inventory( m, *this );
         }
     }
+
+    if( bulk_eligible && !bulk_batch.empty() ) {
+        add_items_bulk( std::move( bulk_batch ), false, false );
+    }
+
     pts.clear();
 }
 
@@ -894,7 +995,7 @@ units::mass inventory::weight() const
 // Helper function to iterate over the intersection of the inventory and a list
 // of items given
 template<typename F>
-void for_each_item_in_both(
+static void for_each_item_in_both(
     const invstack &items, const std::map<const item *, int> &other, const F &f )
 {
     // Shortcut the logic in the common case where other is empty
@@ -975,12 +1076,13 @@ units::volume inventory::volume_without( const std::map<const item *, int> &with
 int inventory::count_item( const itype_id &item_type ) const
 {
     int num = 0;
-    const itype_bin bin = get_binned_items();
-    if( bin.find( item_type ) == bin.end() ) {
-        return num;
+    const itype_bin &bin = get_binned_items();
+    const auto iter = bin.find( item_type );
+    if( iter == bin.end() ) {
+        return 0;
     }
-    const std::list<const item *> items = get_binned_items().find( item_type )->second;
-    for( const item *it : items ) {
+
+    for( const item *it : iter->second ) {
         num += it->count();
     }
     return num;
